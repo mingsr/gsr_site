@@ -116,14 +116,50 @@
     /* ─── LOGO / BRAND ──────────────────────────────────────── */
     .brand {
       display: flex;
+      flex-direction: column;
       align-items: center;
-      gap: 0.65rem;
+      gap: 0;
       animation: fade-down 0.9s ease both;
+    }
+
+    /* Logo image */
+    .brand-logo {
+      width: clamp(80px, 14vw, 150px);
+      height: auto;
+      display: block;
+      margin-bottom: clamp(0.6rem, 2vw, 1rem);
+      /* Neon glow via drop-shadow — animates in sync with pulse */
+      filter:
+        drop-shadow(0 0 10px rgba(0,200,255,0.75))
+        drop-shadow(0 0 28px rgba(0,128,255,0.45));
+      animation: logo-pulse 3s ease-in-out infinite;
+      /* Keep crisp at all sizes */
+      image-rendering: -webkit-optimize-contrast;
+      image-rendering: crisp-edges;
+    }
+
+    @keyframes logo-pulse {
+      0%, 100% {
+        filter:
+          drop-shadow(0 0 8px  rgba(0,200,255,0.65))
+          drop-shadow(0 0 24px rgba(0,128,255,0.35));
+      }
+      50% {
+        filter:
+          drop-shadow(0 0 16px rgba(0,200,255,0.95))
+          drop-shadow(0 0 48px rgba(0,128,255,0.60));
+      }
     }
 
     .brand-icon {
       font-size: clamp(1.6rem, 4vw, 2.2rem);
       filter: drop-shadow(0 0 8px rgba(0,200,255,0.9));
+    }
+
+    .brand-row {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
     }
 
     .brand-name {
@@ -356,8 +392,17 @@
 
     <!-- Brand -->
     <div class="brand">
-      <span class="brand-icon">🎮</span>
-      <span class="brand-name">GameSeruRudolf</span>
+      <!-- Logo: letakkan file gaseru_logo.png di folder yang sama dengan index.html -->
+      <img
+        src="gaseru_logo.png"
+        alt="GameSeruRudolf Logo"
+        class="brand-logo"
+        draggable="false"
+      />
+      <div class="brand-row">
+        <span class="brand-icon">🎮</span>
+        <span class="brand-name">GameSeruRudolf</span>
+      </div>
     </div>
 
     <div class="divider"></div>
