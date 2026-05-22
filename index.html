@@ -308,9 +308,11 @@
       animation: fade-up 1s ease 0.45s both;
     }
 
+    /* top row: title + percentage */
     .progress-label {
       display: flex;
       justify-content: space-between;
+      align-items: baseline;
       font-size: clamp(0.65rem, 1.7vw, 0.78rem);
       font-weight: 600;
       letter-spacing: 0.14em;
@@ -319,21 +321,105 @@
       margin-bottom: 0.6rem;
     }
 
+    .progress-pct-value {
+      font-size: clamp(0.85rem, 2.2vw, 1.05rem);
+      font-weight: 800;
+      color: var(--neon-blue);
+      text-shadow: var(--glow-sm);
+      transition: color 0.4s ease;
+    }
+
+    /* track */
     .progress-track {
       width: 100%;
-      height: 4px;
-      background: rgba(0,200,255,0.1);
+      height: 6px;
+      background: rgba(0,200,255,0.08);
       border-radius: 999px;
       overflow: hidden;
-      border: 1px solid rgba(0,200,255,0.12);
+      border: 1px solid rgba(0,200,255,0.14);
+      position: relative;
+    }
+
+    /* animated shine overlay */
+    .progress-track::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255,255,255,0.07) 50%,
+        transparent 100%
+      );
+      background-size: 200% 100%;
+      animation: shimmer 2.5s linear infinite;
+    }
+
+    @keyframes shimmer {
+      0%   { background-position: -200% 0; }
+      100% { background-position:  200% 0; }
     }
 
     .progress-fill {
       height: 100%;
+      width: 0%;
       border-radius: 999px;
-      background: linear-gradient(90deg, var(--neon-dim), var(--neon-blue));
-      box-shadow: 0 0 10px rgba(0,200,255,0.7);
-      transition: width 1s ease;
+      background: linear-gradient(90deg, var(--neon-dim), var(--neon-blue), #7df9ff);
+      box-shadow: 0 0 12px rgba(0,200,255,0.8), 0 0 4px rgba(0,200,255,0.5);
+      transition: width 0.8s ease;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* bottom meta: note + last update */
+    .progress-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 0.3rem 1rem;
+      margin-top: 0.7rem;
+    }
+
+    .progress-note {
+      font-size: clamp(0.72rem, 1.9vw, 0.82rem);
+      font-weight: 500;
+      color: var(--text-primary);
+      opacity: 0.75;
+      font-style: italic;
+    }
+
+    .progress-note::before { content: '📝 '; font-style: normal; }
+
+    .progress-updated {
+      font-size: clamp(0.62rem, 1.6vw, 0.72rem);
+      font-weight: 400;
+      color: var(--text-muted);
+      letter-spacing: 0.05em;
+      white-space: nowrap;
+    }
+
+    .progress-updated::before { content: '🕐 '; }
+
+    /* status dot — blinks when fetching */
+    .fetch-dot {
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--neon-blue);
+      box-shadow: var(--glow-sm);
+      margin-left: 6px;
+      vertical-align: middle;
+      animation: dot-pulse 1.5s ease-in-out infinite;
+    }
+
+    .fetch-dot.idle { animation: none; opacity: 0.35; }
+    .fetch-dot.error { background: #ff4466; box-shadow: 0 0 8px rgba(255,68,102,0.7); animation: none; }
+
+    @keyframes dot-pulse {
+      0%, 100% { opacity: 1;   transform: scale(1);    }
+      50%       { opacity: 0.3; transform: scale(0.75); }
     }
 
     /* ─── TARGET DATE LINE ──────────────────────────────────── */
@@ -443,15 +529,29 @@
       <p class="released-msg" id="released-msg">🚀 WEBSITE SUDAH RILIS!</p>
     </div>
 
-    <!-- Progress bar -->
+    <!-- ─── PROGRESS BAR (data dari API) ─────────────────── -->
     <div class="progress-section">
+
+      <!-- Label baris atas -->
       <div class="progress-label">
-        <span>Progress Renovasi</span>
-        <span id="progress-pct">0%</span>
+        <span>
+          Progress Renovasi
+          <span class="fetch-dot" id="fetch-dot"></span>
+        </span>
+        <span class="progress-pct-value" id="progress-pct">0%</span>
       </div>
+
+      <!-- Track + fill -->
       <div class="progress-track">
-        <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+        <div class="progress-fill" id="progress-fill"></div>
       </div>
+
+      <!-- Meta baris bawah: note & last update -->
+      <div class="progress-meta">
+        <span class="progress-note"  id="progress-note">Memuat data…</span>
+        <span class="progress-updated" id="progress-updated">—</span>
+      </div>
+
     </div>
 
     <!-- Target date -->
@@ -488,10 +588,6 @@
     // Target: 8 Sep 2026 12:00 WIB (UTC+7)
     const TARGET_UTC = new Date('2026-09-08T05:00:00Z').getTime(); // 12:00 WIB = 05:00 UTC
 
-    // Start reference: page creation approximation for progress bar
-    const START_UTC = new Date('2026-05-22T00:00:00Z').getTime();
-    const TOTAL_MS  = TARGET_UTC - START_UTC;
-
     const pad = n => String(n).padStart(2, '0');
 
     let prevSecs = -1;
@@ -527,12 +623,6 @@
         prevSecs = secs;
       }
 
-      // Progress bar (elapsed / total)
-      const elapsed = now - START_UTC;
-      const pct     = Math.min(100, Math.max(0, (elapsed / TOTAL_MS) * 100));
-      document.getElementById('progress-fill').style.width = pct.toFixed(2) + '%';
-      document.getElementById('progress-pct').textContent  = pct.toFixed(1) + '%';
-
       requestAnimationFrame(updateCountdown);
     }
 
@@ -542,6 +632,49 @@
     }
 
     updateCountdown();
+
+    /* ─── PROGRESS API FETCH ─────────────────────────────── */
+    const API_URL      = 'https://script.google.com/macros/s/AKfycbxretNLz_BOuv93SnBgS6i-A5pn_zXnwMN5cEMCO0Jh_9MaD0uOFlkfwG4I_gvdSeCEhQ/exec';
+    const REFRESH_MS   = 30_000; // auto-refresh setiap 30 detik
+
+    const elFill      = document.getElementById('progress-fill');
+    const elPct       = document.getElementById('progress-pct');
+    const elNote      = document.getElementById('progress-note');
+    const elUpdated   = document.getElementById('progress-updated');
+    const elDot       = document.getElementById('fetch-dot');
+
+    function applyProgress(pct, note, lastUpdate) {
+      const safe = Math.min(100, Math.max(0, Number(pct) || 0));
+      elFill.style.width    = safe + '%';
+      elPct.textContent     = safe + '%';
+      elNote.textContent    = note      || '—';
+      elUpdated.textContent = lastUpdate ? 'Last update: ' + lastUpdate : '—';
+    }
+
+    async function fetchProgress() {
+      elDot.className = 'fetch-dot'; // blink = sedang fetch
+
+      try {
+        const res  = await fetch(API_URL);
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+
+        applyProgress(data.progress, data.note, data.last_update);
+        elDot.className = 'fetch-dot idle'; // sukses → dim steady
+
+      } catch (err) {
+        console.warn('Progress API error:', err);
+        // fallback: jangan timpa data lama jika sudah ada, cukup tandai error
+        if (elPct.textContent === '0%') {
+          applyProgress(0, 'Gagal memuat data — coba lagi…', null);
+        }
+        elDot.className = 'fetch-dot error';
+      }
+    }
+
+    // Jalankan langsung lalu ulangi tiap 30 detik
+    fetchProgress();
+    setInterval(fetchProgress, REFRESH_MS);
   </script>
 </body>
 </html>
