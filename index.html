@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Saira:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pv/1H0DUAA5Z9rj+jhZDPXtVew==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
   <style>
     /* ─── RESET & BASE ─────────────────────────────────────── */
@@ -19,12 +20,15 @@
       --bg-deep:      #020b18;
       --bg-mid:       #040f20;
       --glass-bg:     rgba(0, 200, 255, 0.04);
-      --glass-border: rgba(0, 200, 255, 0.18);
+      --glass-border: rgba(0, 200, 255, 0.14);
+      --card-bg:      rgba(6, 20, 38, 0.55);
+      --card-border:  rgba(0, 200, 255, 0.16);
       --text-primary: #e8f4ff;
       --text-muted:   rgba(200, 230, 255, 0.55);
       --glow-sm:  0 0 8px  rgba(0,200,255,0.6);
       --glow-md:  0 0 20px rgba(0,200,255,0.45), 0 0 60px rgba(0,128,255,0.2);
       --glow-lg:  0 0 40px rgba(0,200,255,0.55), 0 0 120px rgba(0,128,255,0.25);
+      --shadow-soft: 0 10px 30px rgba(0,0,0,0.35);
     }
 
     html { scroll-behavior: smooth; }
@@ -35,13 +39,9 @@
       color: var(--text-primary);
       min-height: 100vh;
       overflow-x: hidden;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
     }
 
-    /* ─── ANIMATED BACKGROUND ───────────────────────────────── */
+    /* ─── ANIMATED BACKGROUND (unchanged) ──────────────────── */
     .bg-layer {
       position: fixed;
       inset: 0;
@@ -49,7 +49,6 @@
       pointer-events: none;
     }
 
-    /* radial gradient base */
     .bg-layer::before {
       content: '';
       position: absolute;
@@ -60,7 +59,6 @@
         linear-gradient(180deg, #020b18 0%, #010810 60%, #000507 100%);
     }
 
-    /* grid overlay */
     .bg-layer::after {
       content: '';
       position: absolute;
@@ -72,7 +70,6 @@
       mask-image: radial-gradient(ellipse 100% 100% at 50% 0%, black 30%, transparent 80%);
     }
 
-    /* floating particles */
     .particles {
       position: fixed;
       inset: 0;
@@ -99,258 +96,264 @@
       100% { transform: translateY(-10vh)  scale(1.2); opacity: 0; }
     }
 
-    /* ─── WRAPPER ───────────────────────────────────────────── */
-    .wrapper {
-      position: relative;
-      z-index: 1;
+    /* ─── HEADER (clean, no neon) ───────────────────────────── */
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
       width: 100%;
-      max-width: 860px;
-      padding: clamp(2rem, 6vw, 5rem) clamp(1.2rem, 5vw, 3rem);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: clamp(1.8rem, 4vw, 3rem);
-      text-align: center;
+      background: rgba(2, 11, 24, 0.45);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(0,200,255,0.08);
     }
 
-    /* ─── LOGO / BRAND ──────────────────────────────────────── */
-    .brand {
+    .header-inner {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 0.9rem clamp(1.2rem, 5vw, 3rem);
       display: flex;
-      flex-direction: column;
       align-items: center;
-      gap: 0;
-      animation: fade-down 0.9s ease both;
+      gap: 0.6rem;
     }
 
-    /* Logo image */
     .brand-logo {
-      width: clamp(80px, 14vw, 150px);
-      height: auto;
+      height: clamp(34px, 5vw, 44px);
+      width: auto;
       display: block;
-      margin-bottom: clamp(0.6rem, 2vw, 1rem);
-      /* Neon glow via drop-shadow — animates in sync with pulse */
-      filter:
-        drop-shadow(0 0 10px rgba(0,200,255,0.75))
-        drop-shadow(0 0 28px rgba(0,128,255,0.45));
-      animation: logo-pulse 3s ease-in-out infinite;
-      /* Keep crisp at all sizes */
       image-rendering: -webkit-optimize-contrast;
       image-rendering: crisp-edges;
     }
 
-    @keyframes logo-pulse {
-      0%, 100% {
-        filter:
-          drop-shadow(0 0 8px  rgba(0,200,255,0.65))
-          drop-shadow(0 0 24px rgba(0,128,255,0.35));
-      }
-      50% {
-        filter:
-          drop-shadow(0 0 16px rgba(0,200,255,0.95))
-          drop-shadow(0 0 48px rgba(0,128,255,0.60));
-      }
-    }
-
-    .brand-icon {
-      font-size: clamp(1.6rem, 4vw, 2.2rem);
-      filter: drop-shadow(0 0 8px rgba(0,200,255,0.9));
-    }
-
-    .brand-row {
-      display: flex;
+    .brand-fallback {
+      display: none;
       align-items: center;
-      gap: 0.55rem;
+      gap: 0.5rem;
     }
 
-    .brand-name {
-      font-size: clamp(1.1rem, 3vw, 1.5rem);
+    .brand-fallback .brand-icon {
+      font-size: 1.3rem;
+    }
+
+    .brand-fallback .brand-name {
+      font-size: 1rem;
       font-weight: 700;
-      letter-spacing: 0.12em;
+      letter-spacing: 0.1em;
       text-transform: uppercase;
       color: var(--neon-blue);
-      text-shadow: var(--glow-sm);
     }
 
-    /* ─── DIVIDER LINE ──────────────────────────────────────── */
-    .divider {
-      width: clamp(120px, 40%, 240px);
-      height: 1px;
-      background: linear-gradient(90deg, transparent, var(--neon-blue), transparent);
-      box-shadow: var(--glow-sm);
-      animation: fade-in 1s ease 0.2s both;
+    /* ─── PAGE / GRID LAYOUT ─────────────────────────────────── */
+    .page {
+      position: relative;
+      z-index: 1;
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: clamp(2rem, 6vw, 3.5rem) clamp(1.2rem, 5vw, 3rem) clamp(1.5rem, 4vw, 2.5rem);
+      display: grid;
+      row-gap: clamp(1.4rem, 3vw, 2rem);
+      grid-template-columns: 1fr;
+      grid-template-areas:
+        "title"
+        "desc"
+        "cdcard"
+        "button"
+        "footer";
+    }
+
+    .area-title  { grid-area: title;  }
+    .area-desc   { grid-area: desc;   }
+    .area-card   { grid-area: cdcard; }
+    .area-button { grid-area: button; }
+    .area-footer { grid-area: footer; }
+
+    @media (min-width: 900px) {
+      .page {
+        column-gap: clamp(2.5rem, 5vw, 4rem);
+        row-gap: 1.6rem;
+        grid-template-columns: 1fr 1fr;
+        grid-template-areas:
+          "cdcard title"
+          "cdcard desc"
+          "cdcard button"
+          "footer footer";
+        align-items: start;
+      }
+      .area-card  { align-self: center; }
+      .area-title, .area-desc, .area-button { align-self: start; }
     }
 
     /* ─── HEADLINE ──────────────────────────────────────────── */
-    .headline {
-      animation: fade-up 1s ease 0.15s both;
+    .area-title, .area-desc { text-align: left; }
+    .area-button { display: flex; }
+
+    @media (max-width: 899px) {
+      .area-title, .area-desc { text-align: center; }
+      .area-button { justify-content: center; }
     }
 
-    .headline h1 {
-      font-size: clamp(1.7rem, 5.5vw, 3.4rem);
+    .area-title h1 {
+      font-size: clamp(1.7rem, 4.4vw, 2.9rem);
       font-weight: 900;
-      line-height: 1.15;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
+      line-height: 1.18;
+      letter-spacing: 0.02em;
       color: #fff;
-      text-shadow:
-        0 0 12px rgba(0,200,255,0.7),
-        0 0 40px rgba(0,128,255,0.35);
+      text-shadow: 0 0 14px rgba(0,200,255,0.35);
+      animation: fade-up 0.9s ease 0.05s both;
     }
 
-    .headline p {
-      margin-top: clamp(0.7rem, 2vw, 1.1rem);
-      font-size: clamp(0.85rem, 2.2vw, 1.08rem);
+    .area-desc p {
+      margin-top: 0.9rem;
+      font-size: clamp(0.9rem, 1.9vw, 1.05rem);
       font-weight: 400;
       color: var(--text-muted);
-      line-height: 1.7;
-      max-width: 560px;
-      margin-left: auto;
-      margin-right: auto;
+      line-height: 1.75;
+      max-width: 480px;
+      animation: fade-up 0.9s ease 0.15s both;
     }
 
-    /* ─── COUNTDOWN CONTAINER ───────────────────────────────── */
-    .countdown-wrap {
-      width: 100%;
-      animation: fade-up 1s ease 0.3s both;
+    @media (max-width: 899px) {
+      .area-desc p { margin-left: auto; margin-right: auto; }
+    }
+
+    /* ─── OLD SITE BUTTON ───────────────────────────────────── */
+    .btn-oldsite {
+      margin-top: 0.4rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.55rem;
+      padding: 0.75rem 1.4rem;
+      border-radius: 999px;
+      border: 1px solid rgba(0,200,255,0.35);
+      background: rgba(0,200,255,0.06);
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      text-decoration: none;
+      transition: background 0.25s ease, border-color 0.25s ease, transform 0.2s ease;
+      animation: fade-up 0.9s ease 0.25s both;
+    }
+
+    .btn-oldsite:hover {
+      background: rgba(0,200,255,0.14);
+      border-color: rgba(0,200,255,0.6);
+      transform: translateY(-2px);
+    }
+
+    .btn-oldsite i { font-size: 0.85rem; color: var(--neon-blue); }
+
+    /* ─── COUNTDOWN CARD ────────────────────────────────────── */
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      padding: clamp(1.3rem, 3.5vw, 2rem);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      box-shadow: var(--shadow-soft);
+      animation: fade-up 0.9s ease 0.1s both;
     }
 
     .countdown-label-top {
-      font-size: clamp(0.65rem, 1.8vw, 0.8rem);
+      font-size: clamp(0.65rem, 1.8vw, 0.78rem);
       font-weight: 600;
-      letter-spacing: 0.22em;
+      letter-spacing: 0.2em;
       text-transform: uppercase;
       color: var(--neon-blue);
-      text-shadow: var(--glow-sm);
-      margin-bottom: 1rem;
       opacity: 0.85;
+      margin-bottom: 1rem;
+      text-align: center;
     }
 
     .countdown-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: clamp(0.6rem, 2vw, 1.2rem);
+      gap: clamp(0.5rem, 2vw, 0.9rem);
     }
 
-    /* individual box */
     .cd-box {
-      background: var(--glass-bg);
-      border: 1px solid var(--glass-border);
-      border-radius: 14px;
-      padding: clamp(1rem, 3vw, 1.8rem) clamp(0.5rem, 2vw, 1rem);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
+      background: rgba(0,200,255,0.03);
+      border: 1px solid rgba(0,200,255,0.10);
+      border-radius: 12px;
+      padding: clamp(0.7rem, 2.4vw, 1.2rem) 0.3rem;
+      text-align: center;
+    }
+
+    .cd-num-wrap {
       position: relative;
       overflow: hidden;
-      animation: pulse-glow 3s ease-in-out infinite;
-    }
-
-    .cd-box::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(0,200,255,0.6), transparent);
-    }
-
-    @keyframes pulse-glow {
-      0%, 100% { box-shadow: 0 0 14px rgba(0,200,255,0.15), inset 0 0 20px rgba(0,200,255,0.03); }
-      50%       { box-shadow: 0 0 28px rgba(0,200,255,0.30), inset 0 0 30px rgba(0,200,255,0.07); }
+      height: clamp(2.1rem, 6.2vw, 3.6rem);
+      line-height: clamp(2.1rem, 6.2vw, 3.6rem);
     }
 
     .cd-num {
       display: block;
-      font-size: clamp(2rem, 7vw, 4rem);
+      font-size: clamp(1.7rem, 5.6vw, 3rem);
       font-weight: 800;
-      line-height: 1;
+      line-height: inherit;
       color: #fff;
-      text-shadow: var(--glow-md);
-      transition: transform 0.2s ease, text-shadow 0.2s ease;
-    }
-
-    .cd-num.tick {
-      animation: tick-pop 0.25s ease;
-    }
-
-    @keyframes tick-pop {
-      0%   { transform: scale(1.18); text-shadow: var(--glow-lg); }
-      100% { transform: scale(1);    text-shadow: var(--glow-md); }
+      text-shadow: var(--glow-sm);
     }
 
     .cd-unit {
       display: block;
-      margin-top: 0.4rem;
-      font-size: clamp(0.55rem, 1.6vw, 0.72rem);
+      margin-top: 0.35rem;
+      font-size: clamp(0.55rem, 1.5vw, 0.68rem);
       font-weight: 600;
-      letter-spacing: 0.2em;
+      letter-spacing: 0.18em;
       text-transform: uppercase;
       color: var(--text-muted);
     }
 
-    /* ─── RELEASED STATE ────────────────────────────────────── */
     .released-msg {
       display: none;
-      font-size: clamp(1.4rem, 4vw, 2.2rem);
+      text-align: center;
+      font-size: clamp(1.2rem, 3.6vw, 1.9rem);
       font-weight: 800;
       color: var(--neon-blue);
-      text-shadow: var(--glow-lg);
-      letter-spacing: 0.06em;
-      animation: pulse-glow-text 2s ease-in-out infinite;
-    }
-
-    @keyframes pulse-glow-text {
-      0%, 100% { text-shadow: var(--glow-md); }
-      50%       { text-shadow: var(--glow-lg); }
+      text-shadow: var(--glow-md);
+      letter-spacing: 0.05em;
     }
 
     /* ─── PROGRESS BAR ──────────────────────────────────────── */
-    .progress-section {
-      width: 100%;
-      animation: fade-up 1s ease 0.45s both;
-    }
+    .progress-section { margin-top: clamp(1.2rem, 3vw, 1.8rem); }
 
-    /* top row: title + percentage */
     .progress-label {
       display: flex;
       justify-content: space-between;
       align-items: baseline;
-      font-size: clamp(0.65rem, 1.7vw, 0.78rem);
+      font-size: clamp(0.62rem, 1.6vw, 0.74rem);
       font-weight: 600;
-      letter-spacing: 0.14em;
+      letter-spacing: 0.12em;
       text-transform: uppercase;
       color: var(--text-muted);
-      margin-bottom: 0.6rem;
+      margin-bottom: 0.55rem;
     }
 
     .progress-pct-value {
-      font-size: clamp(0.85rem, 2.2vw, 1.05rem);
+      font-size: clamp(0.82rem, 2vw, 1rem);
       font-weight: 800;
       color: var(--neon-blue);
-      text-shadow: var(--glow-sm);
       transition: color 0.4s ease;
     }
 
-    /* track */
     .progress-track {
       width: 100%;
       height: 6px;
       background: rgba(0,200,255,0.08);
       border-radius: 999px;
       overflow: hidden;
-      border: 1px solid rgba(0,200,255,0.14);
+      border: 1px solid rgba(0,200,255,0.12);
       position: relative;
     }
 
-    /* animated shine overlay */
     .progress-track::after {
       content: '';
       position: absolute;
       inset: 0;
-      background: linear-gradient(
-        90deg,
-        transparent 0%,
-        rgba(255,255,255,0.07) 50%,
-        transparent 100%
-      );
+      background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.07) 50%, transparent 100%);
       background-size: 200% 100%;
       animation: shimmer 2.5s linear infinite;
     }
@@ -365,43 +368,39 @@
       width: 0%;
       border-radius: 999px;
       background: linear-gradient(90deg, var(--neon-dim), var(--neon-blue), #7df9ff);
-      box-shadow: 0 0 12px rgba(0,200,255,0.8), 0 0 4px rgba(0,200,255,0.5);
+      box-shadow: 0 0 10px rgba(0,200,255,0.6);
       transition: width 0.8s ease;
       position: relative;
       z-index: 1;
     }
 
-    /* bottom meta: note + last update */
     .progress-meta {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
       flex-wrap: wrap;
       gap: 0.3rem 1rem;
-      margin-top: 0.7rem;
+      margin-top: 0.65rem;
     }
 
     .progress-note {
-      font-size: clamp(0.72rem, 1.9vw, 0.82rem);
+      font-size: clamp(0.7rem, 1.8vw, 0.8rem);
       font-weight: 500;
       color: var(--text-primary);
       opacity: 0.75;
       font-style: italic;
     }
-
     .progress-note::before { content: '📝 '; font-style: normal; }
 
     .progress-updated {
-      font-size: clamp(0.62rem, 1.6vw, 0.72rem);
+      font-size: clamp(0.6rem, 1.5vw, 0.7rem);
       font-weight: 400;
       color: var(--text-muted);
-      letter-spacing: 0.05em;
+      letter-spacing: 0.04em;
       white-space: nowrap;
     }
-
     .progress-updated::before { content: '🕐 '; }
 
-    /* status dot — blinks when fetching */
     .fetch-dot {
       display: inline-block;
       width: 6px;
@@ -413,7 +412,6 @@
       vertical-align: middle;
       animation: dot-pulse 1.5s ease-in-out infinite;
     }
-
     .fetch-dot.idle { animation: none; opacity: 0.35; }
     .fetch-dot.error { background: #ff4466; box-shadow: 0 0 8px rgba(255,68,102,0.7); animation: none; }
 
@@ -422,47 +420,73 @@
       50%       { opacity: 0.3; transform: scale(0.75); }
     }
 
-    /* ─── TARGET DATE LINE ──────────────────────────────────── */
     .target-date {
-      font-size: clamp(0.72rem, 1.9vw, 0.85rem);
+      margin-top: clamp(1rem, 2.5vw, 1.4rem);
+      padding-top: clamp(1rem, 2.5vw, 1.4rem);
+      border-top: 1px solid rgba(0,200,255,0.08);
+      text-align: center;
+      font-size: clamp(0.7rem, 1.8vw, 0.82rem);
       font-weight: 500;
       color: var(--text-muted);
-      letter-spacing: 0.08em;
-      animation: fade-in 1s ease 0.55s both;
+      letter-spacing: 0.06em;
     }
 
     .target-date strong {
       color: var(--neon-blue);
-      text-shadow: var(--glow-sm);
     }
 
-    /* ─── FOOTER ────────────────────────────────────────────── */
-    .footer {
-      font-size: clamp(0.6rem, 1.5vw, 0.72rem);
-      color: rgba(200, 230, 255, 0.28);
-      letter-spacing: 0.1em;
+    /* ─── SOCIAL / FOOTER ───────────────────────────────────── */
+    .area-footer {
+      margin-top: clamp(0.5rem, 2vw, 1rem);
+      padding-top: clamp(1.2rem, 3vw, 1.8rem);
+      border-top: 1px solid rgba(0,200,255,0.08);
+      text-align: center;
+    }
+
+    .social-label {
+      font-size: clamp(0.62rem, 1.6vw, 0.74rem);
+      font-weight: 600;
+      letter-spacing: 0.2em;
       text-transform: uppercase;
-      animation: fade-in 1.2s ease 0.7s both;
+      color: var(--text-muted);
+      margin-bottom: 0.9rem;
+    }
+
+    .social-links {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: clamp(1.1rem, 3vw, 1.6rem);
+      margin-bottom: clamp(1.2rem, 3vw, 1.8rem);
+    }
+
+    .social-links a {
+      color: #ffffff;
+      font-size: clamp(1.1rem, 2.6vw, 1.35rem);
+      opacity: 0.75;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+
+    .social-links a:hover {
+      opacity: 1;
+      transform: scale(1.15);
+    }
+
+    .footer-copy {
+      font-size: clamp(0.6rem, 1.4vw, 0.7rem);
+      color: rgba(200, 230, 255, 0.28);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
     }
 
     /* ─── ENTRANCE ANIMATIONS ───────────────────────────────── */
-    @keyframes fade-down {
-      from { opacity: 0; transform: translateY(-20px); }
-      to   { opacity: 1; transform: translateY(0);     }
-    }
     @keyframes fade-up {
-      from { opacity: 0; transform: translateY(24px); }
+      from { opacity: 0; transform: translateY(20px); }
       to   { opacity: 1; transform: translateY(0);    }
     }
-    @keyframes fade-in {
-      from { opacity: 0; }
-      to   { opacity: 1; }
-    }
 
-    /* ─── RESPONSIVE TWEAKS ─────────────────────────────────── */
-    @media (max-width: 480px) {
-      .countdown-grid { gap: 0.5rem; }
-      .cd-box         { border-radius: 10px; }
+    @media (prefers-reduced-motion: reduce) {
+      * { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
     }
   </style>
 </head>
@@ -473,99 +497,134 @@
   <div class="bg-layer" aria-hidden="true"></div>
   <div class="particles" id="particles" aria-hidden="true"></div>
 
-  <!-- Main content -->
-  <main class="wrapper">
-
-    <!-- Brand -->
-    <div class="brand">
-      <!-- Logo: letakkan file gaseru_logo.png di folder yang sama dengan index.html -->
+  <!-- Header -->
+  <header class="site-header">
+    <div class="header-inner">
       <img
         src="gaseru_logo.png"
         alt="GameSeruRudolf Logo"
         class="brand-logo"
         draggable="false"
+        onerror="this.style.display='none'; document.getElementById('brand-fallback').style.display='flex';"
       />
-      <div class="brand-row">
+      <div class="brand-fallback" id="brand-fallback">
         <span class="brand-icon">🎮</span>
         <span class="brand-name">GameSeruRudolf</span>
       </div>
     </div>
+  </header>
 
-    <div class="divider"></div>
+  <!-- Main content -->
+  <main class="page">
 
-    <!-- Headline -->
-    <div class="headline">
-      <h1>Website Sedang Direnovasi 🚧</h1>
+    <!-- Title -->
+    <div class="area-title">
+      <h1>Website Sedang Direvitalisasi</h1>
+    </div>
+
+    <!-- Description -->
+    <div class="area-desc">
       <p>
         Kami sedang melakukan upgrade besar-besaran untuk menghadirkan pengalaman
         gaming yang lebih seru, lebih cepat, dan lebih epic dari sebelumnya.
         Stay tuned!
       </p>
+      <a href="https://old.gameseru-rudolf.my.id" class="btn-oldsite btn-oldsite-desktop-only" target="_blank" rel="noopener">
+        <i class="fa-solid fa-arrow-up-right-from-square"></i>
+        Kunjungi Website Lama
+      </a>
     </div>
 
-    <!-- Countdown -->
-    <div class="countdown-wrap">
-      <p class="countdown-label-top">⏳ Hitung Mundur Peluncuran</p>
+    <!-- Countdown + Progress card -->
+    <div class="area-card">
+      <div class="card">
+        <p class="countdown-label-top">⏳ Hitung Mundur Peluncuran</p>
 
-      <div class="countdown-grid" id="countdown-grid">
-        <div class="cd-box">
-          <span class="cd-num" id="cd-days">00</span>
-          <span class="cd-unit">Hari</span>
+        <div class="countdown-grid" id="countdown-grid">
+          <div class="cd-box">
+            <div class="cd-num-wrap"><span class="cd-num" id="cd-days">00</span></div>
+            <span class="cd-unit">Hari</span>
+          </div>
+          <div class="cd-box">
+            <div class="cd-num-wrap"><span class="cd-num" id="cd-hours">00</span></div>
+            <span class="cd-unit">Jam</span>
+          </div>
+          <div class="cd-box">
+            <div class="cd-num-wrap"><span class="cd-num" id="cd-mins">00</span></div>
+            <span class="cd-unit">Menit</span>
+          </div>
+          <div class="cd-box">
+            <div class="cd-num-wrap"><span class="cd-num" id="cd-secs">00</span></div>
+            <span class="cd-unit">Detik</span>
+          </div>
         </div>
-        <div class="cd-box">
-          <span class="cd-num" id="cd-hours">00</span>
-          <span class="cd-unit">Jam</span>
+
+        <p class="released-msg" id="released-msg">🚀 WEBSITE SUDAH RILIS!</p>
+
+        <!-- Progress -->
+        <div class="progress-section">
+          <div class="progress-label">
+            <span>
+              Progress Renovasi
+              <span class="fetch-dot" id="fetch-dot"></span>
+            </span>
+            <span class="progress-pct-value" id="progress-pct">0%</span>
+          </div>
+
+          <div class="progress-track">
+            <div class="progress-fill" id="progress-fill"></div>
+          </div>
+
+          <div class="progress-meta">
+            <span class="progress-note" id="progress-note">Memuat data…</span>
+            <span class="progress-updated" id="progress-updated">—</span>
+          </div>
         </div>
-        <div class="cd-box">
-          <span class="cd-num" id="cd-mins">00</span>
-          <span class="cd-unit">Menit</span>
-        </div>
-        <div class="cd-box">
-          <span class="cd-num" id="cd-secs">00</span>
-          <span class="cd-unit">Detik</span>
-        </div>
+
+        <!-- Target date -->
+        <p class="target-date">
+          Target Rilis: <strong>8 September 2026 — 12:00 WIB</strong>
+        </p>
       </div>
-
-      <p class="released-msg" id="released-msg">🚀 WEBSITE SUDAH RILIS!</p>
     </div>
 
-    <!-- ─── PROGRESS BAR (data dari API) ─────────────────── -->
-    <div class="progress-section">
-
-      <!-- Label baris atas -->
-      <div class="progress-label">
-        <span>
-          Progress Renovasi
-          <span class="fetch-dot" id="fetch-dot"></span>
-        </span>
-        <span class="progress-pct-value" id="progress-pct">0%</span>
-      </div>
-
-      <!-- Track + fill -->
-      <div class="progress-track">
-        <div class="progress-fill" id="progress-fill"></div>
-      </div>
-
-      <!-- Meta baris bawah: note & last update -->
-      <div class="progress-meta">
-        <span class="progress-note"  id="progress-note">Memuat data…</span>
-        <span class="progress-updated" id="progress-updated">—</span>
-      </div>
-
+    <!-- Old site button (mobile position: right below the card) -->
+    <div class="area-button">
+      <a href="https://old.gameseru-rudolf.my.id" class="btn-oldsite btn-oldsite-mobile-only" target="_blank" rel="noopener">
+        <i class="fa-solid fa-arrow-up-right-from-square"></i>
+        Kunjungi Website Lama
+      </a>
     </div>
 
-    <!-- Target date -->
-    <p class="target-date">
-      Target Rilis: <strong>8 September 2026 — 12:00 WIB</strong>
-    </p>
-
-    <!-- Footer -->
-    <p class="footer">© 2026 GameSeruRudolf &nbsp;·&nbsp; All Rights Reserved</p>
+    <!-- Social + Footer -->
+    <div class="area-footer">
+      <p class="social-label">Ikuti Kami</p>
+      <div class="social-links">
+        <a href="https://www.youtube.com/@gameseru_rudolf" target="_blank" rel="noopener" aria-label="YouTube"><i class="fa-brands fa-youtube"></i></a>
+        <a href="https://www.instagram.com/gameseru_rudolf/" target="_blank" rel="noopener" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+        <a href="https://www.tiktok.com/@gameseru_rudolf" target="_blank" rel="noopener" aria-label="TikTok"><i class="fa-brands fa-tiktok"></i></a>
+        <a href="https://x.com/gameseru_rudolf" target="_blank" rel="noopener" aria-label="X"><i class="fa-brands fa-x-twitter"></i></a>
+        <a href="https://www.facebook.com/profile.php?id=100090011149284&mibextid=ZbWKwL" target="_blank" rel="noopener" aria-label="Facebook"><i class="fa-brands fa-facebook"></i></a>
+        <a href="https://www.threads.net/@gameseru_rudolf" target="_blank" rel="noopener" aria-label="Threads"><i class="fa-brands fa-threads"></i></a>
+      </div>
+      <p class="footer-copy">© 2026 GameSeruRudolf &nbsp;·&nbsp; All Rights Reserved</p>
+    </div>
 
   </main>
 
+  <style>
+    /* show only the relevant "old site" button per breakpoint (same link duplicated once for each layout slot) */
+    .btn-oldsite-mobile-only { display: inline-flex; }
+    .btn-oldsite-desktop-only { display: none; }
+    @media (min-width: 900px) {
+      .btn-oldsite-mobile-only { display: none; }
+      .btn-oldsite-desktop-only { display: inline-flex; }
+      .area-button { display: none; }
+    }
+  </style>
+
   <script>
-    /* ─── PARTICLES ──────────────────────────────────────── */
+    /* ─── PARTICLES (unchanged) ─────────────────────────────── */
     (function spawnParticles() {
       const container = document.getElementById('particles');
       const count = 28;
@@ -584,17 +643,57 @@
       }
     })();
 
-    /* ─── COUNTDOWN ─────────────────────────────────────── */
+    /* ─── COUNTDOWN (logic unchanged, transition upgraded to rolling) ─── */
     // Target: 8 Sep 2026 12:00 WIB (UTC+7)
     const TARGET_UTC = new Date('2026-09-08T05:00:00Z').getTime(); // 12:00 WIB = 05:00 UTC
 
     const pad = n => String(n).padStart(2, '0');
 
-    let prevSecs = -1;
+    /* Rolling-number transition: old value slides down & out, new value
+       slides in from above. Logic of what value to show is untouched —
+       this only replaces how the DOM text is swapped in. */
+    function rollTo(id, newVal) {
+      const el = document.getElementById(id);
+      if (!el || el.textContent === newVal) return;
+
+      const wrap = el.parentElement;
+      const clone = el.cloneNode(true);
+      clone.textContent = newVal;
+      clone.removeAttribute('id');
+      clone.style.position = 'absolute';
+      clone.style.top = '0';
+      clone.style.left = '0';
+      clone.style.width = '100%';
+      clone.style.transform = 'translateY(-100%)';
+      clone.style.opacity = '0';
+      clone.style.transition = 'transform 0.32s cubic-bezier(.3,.9,.4,1), opacity 0.32s ease';
+      wrap.appendChild(clone);
+
+      el.style.transition = 'transform 0.32s cubic-bezier(.3,.9,.4,1), opacity 0.32s ease';
+
+      requestAnimationFrame(() => {
+        el.style.transform = 'translateY(100%)';
+        el.style.opacity = '0';
+        clone.style.transform = 'translateY(0)';
+        clone.style.opacity = '1';
+      });
+
+      setTimeout(() => {
+        clone.id = id;
+        clone.style.position = '';
+        clone.style.top = '';
+        clone.style.left = '';
+        clone.style.width = '';
+        clone.style.transform = '';
+        clone.style.opacity = '';
+        clone.style.transition = '';
+        el.remove();
+      }, 340);
+    }
 
     function updateCountdown() {
-      const now    = Date.now();
-      const diff   = TARGET_UTC - now;
+      const now  = Date.now();
+      const diff = TARGET_UTC - now;
 
       if (diff <= 0) {
         document.getElementById('countdown-grid').style.display = 'none';
@@ -609,39 +708,25 @@
       const mins  = Math.floor((diff % 3600000)  / 60000);
       const secs  = Math.floor((diff % 60000)    / 1000);
 
-      setNum('cd-days',  pad(days));
-      setNum('cd-hours', pad(hours));
-      setNum('cd-mins',  pad(mins));
-
-      // Pulse animation only on second change
-      const secEl = document.getElementById('cd-secs');
-      if (secs !== prevSecs) {
-        secEl.classList.remove('tick');
-        void secEl.offsetWidth; // reflow
-        secEl.classList.add('tick');
-        secEl.textContent = pad(secs);
-        prevSecs = secs;
-      }
+      rollTo('cd-days',  pad(days));
+      rollTo('cd-hours', pad(hours));
+      rollTo('cd-mins',  pad(mins));
+      rollTo('cd-secs',  pad(secs));
 
       requestAnimationFrame(updateCountdown);
     }
 
-    function setNum(id, val) {
-      const el = document.getElementById(id);
-      if (el.textContent !== val) el.textContent = val;
-    }
-
     updateCountdown();
 
-    /* ─── PROGRESS API FETCH ─────────────────────────────── */
-    const API_URL      = 'https://script.google.com/macros/s/AKfycbxretNLz_BOuv93SnBgS6i-A5pn_zXnwMN5cEMCO0Jh_9MaD0uOFlkfwG4I_gvdSeCEhQ/exec';
-    const REFRESH_MS   = 30_000; // auto-refresh setiap 30 detik
+    /* ─── PROGRESS API FETCH (unchanged) ─────────────────────── */
+    const API_URL    = 'https://script.google.com/macros/s/AKfycbxretNLz_BOuv93SnBgS6i-A5pn_zXnwMN5cEMCO0Jh_9MaD0uOFlkfwG4I_gvdSeCEhQ/exec';
+    const REFRESH_MS = 30_000; // auto-refresh setiap 30 detik
 
-    const elFill      = document.getElementById('progress-fill');
-    const elPct       = document.getElementById('progress-pct');
-    const elNote      = document.getElementById('progress-note');
-    const elUpdated   = document.getElementById('progress-updated');
-    const elDot       = document.getElementById('fetch-dot');
+    const elFill    = document.getElementById('progress-fill');
+    const elPct     = document.getElementById('progress-pct');
+    const elNote    = document.getElementById('progress-note');
+    const elUpdated = document.getElementById('progress-updated');
+    const elDot     = document.getElementById('fetch-dot');
 
     function applyProgress(pct, note, lastUpdate) {
       const safe = Math.min(100, Math.max(0, Number(pct) || 0));
@@ -664,7 +749,6 @@
 
       } catch (err) {
         console.warn('Progress API error:', err);
-        // fallback: jangan timpa data lama jika sudah ada, cukup tandai error
         if (elPct.textContent === '0%') {
           applyProgress(0, 'Gagal memuat data — coba lagi…', null);
         }
@@ -672,7 +756,6 @@
       }
     }
 
-    // Jalankan langsung lalu ulangi tiap 30 detik
     fetchProgress();
     setInterval(fetchProgress, REFRESH_MS);
   </script>
