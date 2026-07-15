@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Saira:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pv/1H0DUAA5Z9rj+jhZDPXtVew==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" referrerpolicy="no-referrer" />
 
   <style>
     /* ─── RESET & BASE ─────────────────────────────────────── */
@@ -114,11 +114,12 @@
       padding: 0.9rem clamp(1.2rem, 5vw, 3rem);
       display: flex;
       align-items: center;
+      justify-content: center;
       gap: 0.6rem;
     }
 
     .brand-logo {
-      height: clamp(34px, 5vw, 44px);
+      height: clamp(48px, 7vw, 62px);
       width: auto;
       display: block;
       image-rendering: -webkit-optimize-contrast;
@@ -289,12 +290,30 @@
     }
 
     .cd-num {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
       display: block;
       font-size: clamp(1.7rem, 5.6vw, 3rem);
       font-weight: 800;
       line-height: inherit;
       color: #fff;
-      text-shadow: var(--glow-sm);
+      transform: translateY(0);
+    }
+
+    /* Rolling-number transition: pure vertical slide, no fade/blur/glow.
+       .cd-num-out = old digit sliding down and out.
+       .cd-num-in  = new digit sliding in from above (starts here, then
+       animates to translateY(0) once appended). */
+    .cd-num.cd-num-anim {
+      transition: transform 0.25s ease;
+    }
+    .cd-num-out {
+      transform: translateY(100%);
+    }
+    .cd-num-in {
+      transform: translateY(-100%);
     }
 
     .cd-unit {
@@ -529,10 +548,6 @@
         gaming yang lebih seru, lebih cepat, dan lebih epic dari sebelumnya.
         Stay tuned!
       </p>
-      <a href="https://old.gameseru-rudolf.my.id" class="btn-oldsite btn-oldsite-desktop-only" target="_blank" rel="noopener">
-        <i class="fa-solid fa-arrow-up-right-from-square"></i>
-        Kunjungi Website Lama
-      </a>
     </div>
 
     <!-- Countdown + Progress card -->
@@ -588,9 +603,9 @@
       </div>
     </div>
 
-    <!-- Old site button (mobile position: right below the card) -->
+    <!-- Old site button: single element, repositioned per breakpoint via grid-area -->
     <div class="area-button">
-      <a href="https://old.gameseru-rudolf.my.id" class="btn-oldsite btn-oldsite-mobile-only" target="_blank" rel="noopener">
+      <a href="https://old.gameseru-rudolf.my.id" class="btn-oldsite" target="_blank" rel="noopener">
         <i class="fa-solid fa-arrow-up-right-from-square"></i>
         Kunjungi Website Lama
       </a>
@@ -611,17 +626,6 @@
     </div>
 
   </main>
-
-  <style>
-    /* show only the relevant "old site" button per breakpoint (same link duplicated once for each layout slot) */
-    .btn-oldsite-mobile-only { display: inline-flex; }
-    .btn-oldsite-desktop-only { display: none; }
-    @media (min-width: 900px) {
-      .btn-oldsite-mobile-only { display: none; }
-      .btn-oldsite-desktop-only { display: inline-flex; }
-      .area-button { display: none; }
-    }
-  </style>
 
   <script>
     /* ─── PARTICLES (unchanged) ─────────────────────────────── */
@@ -649,46 +653,42 @@
 
     const pad = n => String(n).padStart(2, '0');
 
-    /* Rolling-number transition: old value slides down & out, new value
-       slides in from above. Logic of what value to show is untouched —
-       this only replaces how the DOM text is swapped in. */
+    /* Rolling-number transition: old digit slides straight down and out,
+       new digit slides straight in from above. Pure transform, no opacity
+       fade, no text-shadow/glow, no blur — and it only ever runs when the
+       logical value actually changes (tracked via data-val, not
+       textContent, so it can't retrigger on every animation frame). */
     function rollTo(id, newVal) {
       const el = document.getElementById(id);
-      if (!el || el.textContent === newVal) return;
+      if (!el) return;
+      if (el.dataset.val === newVal) return; // value unchanged → no animation
+      el.dataset.val = newVal;
 
       const wrap = el.parentElement;
-      const clone = el.cloneNode(true);
-      clone.textContent = newVal;
-      clone.removeAttribute('id');
-      clone.style.position = 'absolute';
-      clone.style.top = '0';
-      clone.style.left = '0';
-      clone.style.width = '100%';
-      clone.style.transform = 'translateY(-100%)';
-      clone.style.opacity = '0';
-      clone.style.transition = 'transform 0.32s cubic-bezier(.3,.9,.4,1), opacity 0.32s ease';
-      wrap.appendChild(clone);
 
-      el.style.transition = 'transform 0.32s cubic-bezier(.3,.9,.4,1), opacity 0.32s ease';
+      // Incoming digit starts stacked above the visible row.
+      const incoming = document.createElement('span');
+      incoming.className = 'cd-num cd-num-in';
+      incoming.textContent = newVal;
+      wrap.appendChild(incoming);
+
+      // Force layout so the browser registers the starting position
+      // before we animate, otherwise the transition can be skipped.
+      void incoming.offsetHeight;
+
+      el.classList.add('cd-num-anim');
+      incoming.classList.add('cd-num-anim');
 
       requestAnimationFrame(() => {
-        el.style.transform = 'translateY(100%)';
-        el.style.opacity = '0';
-        clone.style.transform = 'translateY(0)';
-        clone.style.opacity = '1';
+        el.classList.add('cd-num-out');       // old digit slides down/out
+        incoming.classList.remove('cd-num-in'); // new digit slides to translateY(0)
       });
 
-      setTimeout(() => {
-        clone.id = id;
-        clone.style.position = '';
-        clone.style.top = '';
-        clone.style.left = '';
-        clone.style.width = '';
-        clone.style.transform = '';
-        clone.style.opacity = '';
-        clone.style.transition = '';
-        el.remove();
-      }, 340);
+      window.setTimeout(() => {
+        el.textContent = newVal;
+        el.classList.remove('cd-num-anim', 'cd-num-out');
+        incoming.remove();
+      }, 260);
     }
 
     function updateCountdown() {
